@@ -104,15 +104,23 @@ filtered_df = filter_data(
 # Statistics Cards
 # ---------------------------------
 
+unique_questions = filtered_df.drop_duplicates(subset="title")
+
 col1, col2, col3 = st.columns(3)
 
-col1.metric("Total Questions", len(filtered_df))
+col1.metric(
+    "Total Unique Questions",
+    unique_questions["title"].nunique()
+)
 
-col2.metric("Unique Companies", filtered_df["company"].nunique())
+col2.metric(
+    "Unique Companies",
+    filtered_df["company"].nunique()
+)
 
 col3.metric(
     "Average Acceptance",
-    f"{filtered_df['acceptance %'].mean():.2f}%"
+    f"{unique_questions['acceptance %'].mean():.2f}%"
 )
 
 st.divider()
@@ -123,7 +131,9 @@ st.divider()
 
 st.subheader("Difficulty Distribution")
 
-difficulty_counts = filtered_df["difficulty"].value_counts()
+unique_questions = filtered_df.drop_duplicates(subset="title")
+
+difficulty_counts = unique_questions["difficulty"].value_counts()
 
 st.bar_chart(difficulty_counts)
 
