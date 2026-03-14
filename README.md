@@ -66,7 +66,7 @@ This enables **company-wise interview preparation and problem tracking.**
 ```bash
 git clone https://github.com/mukut02/company-wise-qs.git
 cd company-wise-qs
-
+```
 ---
 ##  Credits
 
