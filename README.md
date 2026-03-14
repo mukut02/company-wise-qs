@@ -31,12 +31,13 @@ This helps users **target interview preparation for specific companies efficient
 ---
 
 ## 🏗️ Project Structure
-company-wise-qs/
-│
+
+```
+company-wise-qs
 ├── app.py                  # Main Streamlit application
 ├── leetcode_dataset.csv    # Dataset containing questions
 ├── requirements.txt        # Python dependencies
-
+```
 ---
 
 
