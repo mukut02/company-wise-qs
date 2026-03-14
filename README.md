@@ -66,3 +66,14 @@ This enables **company-wise interview preparation and problem tracking.**
 ```bash
 git clone https://github.com/mukut02/company-wise-qs.git
 cd company-wise-qs
+
+---
+##  Credits
+
+The dataset used in this project is inspired by and derived from the following open-source repository:
+
+- https://github.com/snehasishroy/leetcode-companywise-interview-questions
+
+This repository contains **company-wise LeetCode interview questions categorized by recency**, along with attributes such as difficulty, acceptance rate, and frequency. :contentReference[oaicite:0]{index=0}
+
+Special thanks to **Snehasish Roy** for compiling and maintaining this valuable resource for interview preparation.
