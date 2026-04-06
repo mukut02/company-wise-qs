@@ -14,6 +14,27 @@ def go_next_page() -> None:
     st.session_state.card_page = min(st.session_state.total_card_pages, st.session_state.card_page + 1)
 
 
+def render_page_control(label: str, total_pages: int, current_page: int) -> None:
+    if total_pages > 1:
+        st.slider(
+            label,
+            min_value=1,
+            max_value=total_pages,
+            value=current_page,
+            key="card_page",
+        )
+    else:
+        st.markdown(
+            """
+            <div class="page-indicator">
+                <div class="page-indicator-label">Page</div>
+                <div class="page-indicator-value">1 of 1</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
 st.set_page_config(
     page_title="Company-Wise LeetCode Qs",
     layout="wide",
@@ -36,6 +57,7 @@ filtered_df = filter_data(
 filtered_df = sort_data(filtered_df, filters["sort_label"])
 
 cards_per_page = filters["cards_per_page"]
+result_count = len(filtered_df)
 total_card_pages = max(1, (len(filtered_df) + cards_per_page - 1) // cards_per_page)
 st.session_state.total_card_pages = total_card_pages
 is_minimal_mode = filters["view_mode"] == "Minimalistic mode"
@@ -62,6 +84,16 @@ card_page = st.session_state.card_page
 if not is_minimal_mode:
     render_metrics(filtered_df)
 
+    if 0 < result_count <= cards_per_page:
+        st.markdown(
+            f"""
+            <div class="status-check">
+                <strong>All set:</strong> this selection has {result_count} question{"s" if result_count != 1 else ""}, so everything fits on one page with the current cards setting.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
     st.markdown('<div class="section-label">Problem Spotlight</div>', unsafe_allow_html=True)
     start_card = 0 if len(filtered_df) == 0 else (card_page - 1) * cards_per_page + 1
     end_card = min(card_page * cards_per_page, len(filtered_df))
@@ -72,13 +104,7 @@ if not is_minimal_mode:
 
     page_col, nav_col1, nav_col2 = st.columns([1.4, 1, 1.2])
     with page_col:
-        st.slider(
-            "Card page",
-            min_value=1,
-            max_value=total_card_pages,
-            value=card_page,
-            key="card_page",
-        )
+        render_page_control("Card page", total_card_pages, card_page)
     with nav_col1:
         st.button(
             "< Previous",
@@ -108,13 +134,7 @@ if not is_minimal_mode:
 else:
     page_col, nav_col1, nav_col2 = st.columns([1.4, 1, 1.2])
     with page_col:
-        st.slider(
-            "Table page",
-            min_value=1,
-            max_value=total_card_pages,
-            value=card_page,
-            key="card_page",
-        )
+        render_page_control("Table page", total_card_pages, card_page)
     with nav_col1:
         st.button(
             "< Previous",

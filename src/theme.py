@@ -310,6 +310,56 @@ APP_CSS = """
             0 16px 30px rgba(255, 49, 92, 0.08);
     }
 
+    .status-check {
+        margin-top: 0.8rem;
+        margin-bottom: 0.8rem;
+        padding: 0.95rem 1.1rem;
+        border-radius: 18px;
+        border: 1px solid rgba(115, 255, 184, 0.18);
+        background:
+            linear-gradient(145deg, rgba(84, 255, 180, 0.1), rgba(255, 79, 216, 0.04)),
+            rgba(14, 18, 17, 0.92);
+        color: #e8fff1;
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.03),
+            0 14px 28px rgba(20, 160, 110, 0.08);
+    }
+
+    .status-check strong {
+        color: #87ffc0;
+        text-transform: uppercase;
+        letter-spacing: 0.06rem;
+        margin-right: 0.35rem;
+    }
+
+    .page-indicator {
+        min-height: 3rem;
+        padding: 0.72rem 1rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 96, 154, 0.2);
+        background:
+            linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)),
+            rgba(18, 10, 24, 0.92);
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.03),
+            0 10px 24px rgba(255, 49, 92, 0.08);
+    }
+
+    .page-indicator-label {
+        color: #f3b8c9;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08rem;
+        text-transform: uppercase;
+        margin-bottom: 0.2rem;
+    }
+
+    .page-indicator-value {
+        color: #fff4f8;
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
     .update-kicker {
         color: #ff9abe;
         font-size: 0.72rem;

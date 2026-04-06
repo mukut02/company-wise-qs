@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Iterable
 
 import pandas as pd
@@ -14,6 +15,24 @@ SORT_OPTIONS = {
     "Difficulty": ("difficulty", True),
 }
 VIEW_MODES = ["Aesthetic mode", "Minimalistic mode"]
+
+
+def _normalize_company_name(value: str) -> str:
+    return re.sub(r"\s+", " ", str(value).strip().lower().replace("-", " ")).strip()
+
+
+def _format_company_label(company: str) -> str:
+    tokens = _normalize_company_name(company).split()
+    formatted_tokens = []
+    acronym_tokens = {"amd", "ibm", "lg", "meta", "npci", "tcs", "uber", "visa", "wix"}
+
+    for token in tokens:
+        if token in acronym_tokens or (token.isalpha() and len(token) <= 3):
+            formatted_tokens.append(token.upper())
+        else:
+            formatted_tokens.append(token.capitalize())
+
+    return " ".join(formatted_tokens)
 
 
 def render_filters(df: pd.DataFrame) -> dict:
@@ -32,10 +51,12 @@ def render_filters(df: pd.DataFrame) -> dict:
 
     row1_col1, row1_col2, row1_col3 = st.columns([1.5, 1, 1])
     with row1_col1:
+        company_options = sorted(df["company"].dropna().unique(), key=_format_company_label)
         companies = st.multiselect(
             "Companies",
-            options=sorted(df["company"].dropna().unique()),
+            options=company_options,
             placeholder="Choose one or more companies",
+            format_func=_format_company_label,
             key="main_companies",
         )
     with row1_col2:
@@ -97,7 +118,10 @@ def filter_data(
     filtered = df.copy()
 
     if companies:
-        filtered = filtered[filtered["company"].isin(companies)]
+        selected_companies = {_normalize_company_name(company) for company in companies}
+        filtered = filtered[
+            filtered["company"].map(_normalize_company_name).isin(selected_companies)
+        ]
 
     if difficulty:
         filtered = filtered[filtered["difficulty"].isin(difficulty)]
