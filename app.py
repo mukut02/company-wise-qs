@@ -84,16 +84,6 @@ card_page = st.session_state.card_page
 if not is_minimal_mode:
     render_metrics(filtered_df)
 
-    if 0 < result_count <= cards_per_page:
-        st.markdown(
-            f"""
-            <div class="status-check">
-                <strong>All set:</strong> this selection has {result_count} question{"s" if result_count != 1 else ""}, so everything fits on one page with the current cards setting.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
     st.markdown('<div class="section-label">Problem Spotlight</div>', unsafe_allow_html=True)
     start_card = 0 if len(filtered_df) == 0 else (card_page - 1) * cards_per_page + 1
     end_card = min(card_page * cards_per_page, len(filtered_df))
