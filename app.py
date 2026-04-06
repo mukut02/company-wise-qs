@@ -1,180 +1,135 @@
 import streamlit as st
-import pandas as pd
 
-# ---------------------------------
-# Page Config
-# ---------------------------------
+from src.data import load_data
+from src.filters import filter_data, render_filters, sort_data
+from src.theme import APP_CSS
+from src.views import render_hero, render_metrics, render_react_cards, render_table
+
+
+def go_prev_page() -> None:
+    st.session_state.card_page = max(1, st.session_state.card_page - 1)
+
+
+def go_next_page() -> None:
+    st.session_state.card_page = min(st.session_state.total_card_pages, st.session_state.card_page + 1)
+
 
 st.set_page_config(
-    page_title="LeetCode Company Questions",
-    layout="wide"
+    page_title="Company-Wise LeetCode Radar",
+    page_icon=":sparkles:",
+    layout="wide",
 )
 
-st.title("💻 LeetCode Company Interview Questions Explorer")
-
-# ---------------------------------
-# Load Data
-# ---------------------------------
-
-@st.cache_data
-def load_data():
-    df = pd.read_csv("leetcode_dataset.csv")
-
-    # Normalize column names
-    df.columns = df.columns.str.strip().str.lower()
-
-    # Convert percentage columns safely
-    df["acceptance %"] = pd.to_numeric(
-        df["acceptance %"].astype(str).str.replace("%", ""),
-        errors="coerce"
-    )
-
-    df["frequency %"] = pd.to_numeric(
-        df["frequency %"].astype(str).str.replace("%", ""),
-        errors="coerce"
-    )
-
-    return df
-
+st.markdown(APP_CSS, unsafe_allow_html=True)
 
 df = load_data()
-
-# ---------------------------------
-# Sidebar Filters
-# ---------------------------------
-
-st.sidebar.header("Filters")
-
-companies = st.sidebar.multiselect(
-    "Select Company",
-    sorted(df["company"].unique())
-)
-
-difficulty = st.sidebar.multiselect(
-    "Difficulty",
-    ["Easy", "Medium", "Hard"]
-)
-
-acceptance_range = st.sidebar.slider(
-    "Acceptance Rate",
-    0.0,
-    100.0,
-    (0.0, 100.0)
-)
-
-# ---------------------------------
-# Search
-# ---------------------------------
-
-search_query = st.text_input("🔍 Search Problem")
-
-# ---------------------------------
-# Filter Function (Cached)
-# ---------------------------------
-
-@st.cache_data
-def filter_data(df, companies, difficulty, acceptance_range, search_query):
-
-    filtered = df.copy()
-
-    if companies:
-        filtered = filtered[filtered["company"].isin(companies)]
-
-    if difficulty:
-        filtered = filtered[filtered["difficulty"].isin(difficulty)]
-
-    filtered = filtered[
-        (filtered["acceptance %"] >= acceptance_range[0]) &
-        (filtered["acceptance %"] <= acceptance_range[1])
-    ]
-
-    if search_query:
-        filtered = filtered[
-            filtered["title"].str.contains(search_query, case=False, na=False)
-        ]
-
-    return filtered
-
+filters = render_filters(df)
 
 filtered_df = filter_data(
-    df, companies, difficulty, acceptance_range, search_query
+    df,
+    filters["companies"],
+    filters["difficulty"],
+    filters["acceptance_range"],
+    filters["search_query"],
+)
+filtered_df = sort_data(filtered_df, filters["sort_label"])
+
+cards_per_page = filters["cards_per_page"]
+total_card_pages = max(1, (len(filtered_df) + cards_per_page - 1) // cards_per_page)
+st.session_state.total_card_pages = total_card_pages
+is_minimal_mode = filters["view_mode"] == "Minimalistic mode"
+
+if is_minimal_mode:
+    st.markdown(
+        """
+        <style>
+            .block-container {
+                max-width: 96vw;
+                padding-top: 1.2rem;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+if "card_page" not in st.session_state:
+    st.session_state.card_page = 1
+
+st.session_state.card_page = min(max(st.session_state.card_page, 1), total_card_pages)
+card_page = st.sidebar.slider(
+    "Card page",
+    min_value=1,
+    max_value=total_card_pages,
+    value=st.session_state.card_page,
+    key="card_page",
 )
 
-# ---------------------------------
-# Statistics Cards
-# ---------------------------------
+sidebar_nav_col1, sidebar_nav_col2 = st.sidebar.columns(2)
+with sidebar_nav_col1:
+    st.button(
+        "< Prev",
+        use_container_width=True,
+        disabled=card_page <= 1 or is_minimal_mode,
+        key="sidebar_prev_page",
+        on_click=go_prev_page,
+    )
+with sidebar_nav_col2:
+    st.button(
+        "Next >",
+        use_container_width=True,
+        disabled=card_page >= total_card_pages or is_minimal_mode,
+        key="sidebar_next_page",
+        on_click=go_next_page,
+    )
 
-unique_questions = filtered_df.drop_duplicates(subset="title")
+if not is_minimal_mode:
+    render_hero(total_rows=len(df), total_companies=df["company"].nunique())
+    render_metrics(filtered_df)
 
-col1, col2, col3 = st.columns(3)
+    st.markdown('<div class="section-label">Problem Spotlight</div>', unsafe_allow_html=True)
+    start_card = 0 if len(filtered_df) == 0 else (card_page - 1) * cards_per_page + 1
+    end_card = min(card_page * cards_per_page, len(filtered_df))
+    st.markdown(
+        f'<div class="spotlight-meta">Page {card_page} of {total_card_pages} | Showing cards {start_card}-{end_card} of {len(filtered_df):,}</div>',
+        unsafe_allow_html=True,
+    )
 
-col1.metric(
-    "Total Unique Questions",
-    unique_questions["title"].nunique()
-)
-
-col2.metric(
-    "Unique Companies",
-    filtered_df["company"].nunique()
-)
-
-col3.metric(
-    "Average Acceptance",
-    f"{unique_questions['acceptance %'].mean():.2f}%"
-)
-
-st.divider()
-
-# ---------------------------------
-# Difficulty Distribution Chart
-# ---------------------------------
-
-st.subheader("Difficulty Distribution")
-
-unique_questions = filtered_df.drop_duplicates(subset="title")
-
-difficulty_counts = unique_questions["difficulty"].value_counts()
-
-st.bar_chart(difficulty_counts)
-
-# ---------------------------------
-# Sorting
-# ---------------------------------
-
-sort_option = st.selectbox(
-    "Sort By",
-    ["acceptance %", "frequency %", "difficulty"]
-)
-
-filtered_df = filtered_df.sort_values(by=sort_option, ascending=False)
-
-# ---------------------------------
-# Data Table
-# ---------------------------------
-
-st.subheader("Filtered Questions")
-
-display_df = filtered_df[
-    [
-        "title",
-        "difficulty",
-        "acceptance %",
-        "frequency %",
-        "company",
-        "url"
-    ]
-]
-
-st.dataframe(
-    display_df,
-    column_config={
-        "url": st.column_config.LinkColumn(
-            "LeetCode Problem",
-            display_text="Open"
+    nav_col1, nav_col2 = st.columns([1, 1.2])
+    with nav_col1:
+        st.button(
+            "< Previous",
+            use_container_width=True,
+            disabled=card_page <= 1,
+            key="main_prev_page",
+            on_click=go_prev_page,
         )
-    },
-    use_container_width=True,
-    height=500
-)
-
-st.caption(f"Showing {len(display_df)} questions")
+    with nav_col2:
+        st.button(
+            "Next Page >",
+            use_container_width=True,
+            disabled=card_page >= total_card_pages,
+            key="main_next_page",
+            on_click=go_next_page,
+        )
+    render_react_cards(filtered_df, card_page, cards_per_page)
+    st.markdown(
+        """
+        <div class="update-panel">
+            <div class="update-kicker">Updates</div>
+            <p class="update-copy">Topic-wise tags will be added soon.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+else:
+    st.markdown('<div class="section-label">Full Results Table</div>', unsafe_allow_html=True)
+    render_table(filtered_df, height=900)
+    st.markdown(
+        """
+        <div class="update-panel">
+            <div class="update-kicker">Updates</div>
+            <p class="update-copy">Topic-wise tags will be added soon.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
