@@ -17,12 +17,12 @@ VIEW_MODES = ["Aesthetic mode", "Minimalistic mode"]
 
 
 def render_filters(df: pd.DataFrame) -> dict:
-    st.sidebar.markdown(
+    st.markdown(
         """
-        <div class="sidebar-panel">
-            <div class="sidebar-kicker">Control Deck</div>
-            <div class="sidebar-title">Refine Your Hunt</div>
-            <div class="sidebar-copy">
+        <div class="control-panel">
+            <div class="control-kicker">Control Deck</div>
+            <div class="control-title">Refine Your Hunt</div>
+            <div class="control-copy">
                 Tune the dataset with sharper filters and cleaner sorting.
             </div>
         </div>
@@ -30,39 +30,50 @@ def render_filters(df: pd.DataFrame) -> dict:
         unsafe_allow_html=True,
     )
 
-    companies = st.sidebar.multiselect(
-        "Companies",
-        options=sorted(df["company"].dropna().unique()),
-        placeholder="Choose one or more companies",
-    )
+    row1_col1, row1_col2, row1_col3 = st.columns([1.5, 1, 1])
+    with row1_col1:
+        companies = st.multiselect(
+            "Companies",
+            options=sorted(df["company"].dropna().unique()),
+            placeholder="Choose one or more companies",
+            key="main_companies",
+        )
+    with row1_col2:
+        difficulty = st.multiselect(
+            "Difficulty",
+            options=DIFFICULTY_ORDER,
+            placeholder="Any difficulty",
+            key="main_difficulty",
+        )
+    with row1_col3:
+        acceptance_range = st.slider(
+            "Acceptance rate",
+            min_value=0.0,
+            max_value=100.0,
+            value=(0.0, 100.0),
+            key="main_acceptance_range",
+        )
 
-    difficulty = st.sidebar.multiselect(
-        "Difficulty",
-        options=DIFFICULTY_ORDER,
-        placeholder="Any difficulty",
-    )
-
-    acceptance_range = st.sidebar.slider(
-        "Acceptance rate",
-        min_value=0.0,
-        max_value=100.0,
-        value=(0.0, 100.0),
-    )
-
-    search_query = st.sidebar.text_input(
-        "Search problem title",
-        placeholder="Binary tree, graph, DP...",
-    )
-
-    sort_label = st.sidebar.selectbox("Sort by", options=list(SORT_OPTIONS.keys()))
-    view_mode = st.sidebar.selectbox("View mode", options=VIEW_MODES, index=0)
-    cards_per_page = st.sidebar.slider(
-        "Cards per page",
-        min_value=6,
-        max_value=48,
-        value=18,
-        step=6,
-    )
+    row2_col1, row2_col2, row2_col3, row2_col4 = st.columns([1.45, 1, 1, 1])
+    with row2_col1:
+        search_query = st.text_input(
+            "Search problem title",
+            placeholder="Binary tree, graph, DP...",
+            key="main_search_query",
+        )
+    with row2_col2:
+        sort_label = st.selectbox("Sort by", options=list(SORT_OPTIONS.keys()), key="main_sort_label")
+    with row2_col3:
+        view_mode = st.selectbox("View mode", options=VIEW_MODES, index=0, key="main_view_mode")
+    with row2_col4:
+        cards_per_page = st.slider(
+            "Cards per page",
+            min_value=6,
+            max_value=48,
+            value=18,
+            step=6,
+            key="main_cards_per_page",
+        )
 
     return {
         "companies": companies,

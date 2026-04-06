@@ -15,14 +15,15 @@ def go_next_page() -> None:
 
 
 st.set_page_config(
-    page_title="Company-Wise LeetCode Radar",
-    page_icon=":sparkles:",
+    page_title="Company-Wise LeetCode Qs",
     layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
 st.markdown(APP_CSS, unsafe_allow_html=True)
 
 df = load_data()
+render_hero(total_rows=len(df), total_companies=df["company"].nunique())
 filters = render_filters(df)
 
 filtered_df = filter_data(
@@ -56,34 +57,9 @@ if "card_page" not in st.session_state:
     st.session_state.card_page = 1
 
 st.session_state.card_page = min(max(st.session_state.card_page, 1), total_card_pages)
-card_page = st.sidebar.slider(
-    "Card page",
-    min_value=1,
-    max_value=total_card_pages,
-    value=st.session_state.card_page,
-    key="card_page",
-)
-
-sidebar_nav_col1, sidebar_nav_col2 = st.sidebar.columns(2)
-with sidebar_nav_col1:
-    st.button(
-        "< Prev",
-        use_container_width=True,
-        disabled=card_page <= 1 or is_minimal_mode,
-        key="sidebar_prev_page",
-        on_click=go_prev_page,
-    )
-with sidebar_nav_col2:
-    st.button(
-        "Next >",
-        use_container_width=True,
-        disabled=card_page >= total_card_pages or is_minimal_mode,
-        key="sidebar_next_page",
-        on_click=go_next_page,
-    )
+card_page = st.session_state.card_page
 
 if not is_minimal_mode:
-    render_hero(total_rows=len(df), total_companies=df["company"].nunique())
     render_metrics(filtered_df)
 
     st.markdown('<div class="section-label">Problem Spotlight</div>', unsafe_allow_html=True)
@@ -94,7 +70,15 @@ if not is_minimal_mode:
         unsafe_allow_html=True,
     )
 
-    nav_col1, nav_col2 = st.columns([1, 1.2])
+    page_col, nav_col1, nav_col2 = st.columns([1.4, 1, 1.2])
+    with page_col:
+        st.slider(
+            "Card page",
+            min_value=1,
+            max_value=total_card_pages,
+            value=card_page,
+            key="card_page",
+        )
     with nav_col1:
         st.button(
             "< Previous",
@@ -122,6 +106,31 @@ if not is_minimal_mode:
         unsafe_allow_html=True,
     )
 else:
+    page_col, nav_col1, nav_col2 = st.columns([1.4, 1, 1.2])
+    with page_col:
+        st.slider(
+            "Table page",
+            min_value=1,
+            max_value=total_card_pages,
+            value=card_page,
+            key="card_page",
+        )
+    with nav_col1:
+        st.button(
+            "< Previous",
+            use_container_width=True,
+            disabled=card_page <= 1,
+            key="minimal_prev_page",
+            on_click=go_prev_page,
+        )
+    with nav_col2:
+        st.button(
+            "Next Page >",
+            use_container_width=True,
+            disabled=card_page >= total_card_pages,
+            key="minimal_next_page",
+            on_click=go_next_page,
+        )
     st.markdown('<div class="section-label">Full Results Table</div>', unsafe_allow_html=True)
     render_table(filtered_df, height=900)
     st.markdown(

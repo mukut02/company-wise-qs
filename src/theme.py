@@ -73,6 +73,20 @@ APP_CSS = """
         border-right: 1px solid var(--line);
     }
 
+    [data-testid="stSidebar"][aria-expanded="true"] {
+        min-width: 21rem;
+        max-width: 21rem;
+    }
+
+    [data-testid="stSidebar"][aria-expanded="false"] {
+        min-width: 0;
+        max-width: 0;
+        background: transparent;
+        border-right: none;
+        box-shadow: none;
+        overflow: hidden;
+    }
+
     [data-testid="stSidebar"] > div:first-child {
         background:
             radial-gradient(circle at top, rgba(255, 79, 216, 0.08), transparent 22%),
@@ -89,7 +103,15 @@ APP_CSS = """
         padding-right: 1rem;
     }
 
-    .sidebar-panel {
+    [data-testid="stSidebar"][aria-expanded="false"] > div:first-child {
+        background: transparent;
+    }
+
+    [data-testid="collapsedControl"] {
+        display: none;
+    }
+
+    .control-panel {
         margin-bottom: 1rem;
         padding: 1rem 1rem 0.9rem;
         border-radius: 24px;
@@ -102,7 +124,7 @@ APP_CSS = """
             0 18px 36px rgba(255, 49, 92, 0.12);
     }
 
-    .sidebar-kicker {
+    .control-kicker {
         font-size: 0.72rem;
         font-weight: 800;
         letter-spacing: 0.18rem;
@@ -111,7 +133,7 @@ APP_CSS = """
         margin-bottom: 0.4rem;
     }
 
-    .sidebar-title {
+    .control-title {
         font-size: 1.5rem;
         font-weight: 900;
         line-height: 1;
@@ -124,7 +146,7 @@ APP_CSS = """
         margin-bottom: 0.5rem;
     }
 
-    .sidebar-copy {
+    .control-copy {
         font-size: 0.92rem;
         color: var(--text-soft);
         line-height: 1.45;
@@ -334,8 +356,9 @@ APP_CSS = """
         font-size: 0.77rem;
     }
 
-    [data-testid="stSidebar"] [data-baseweb="select"] > div,
-    [data-testid="stSidebar"] .stTextInput > div > div > input {
+    .stSelectbox [data-baseweb="select"] > div,
+    .stMultiSelect [data-baseweb="select"] > div,
+    .stTextInput > div > div > input {
         border-radius: 16px !important;
         border: 1px solid rgba(255, 99, 155, 0.22) !important;
         background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)) !important;
@@ -343,26 +366,28 @@ APP_CSS = """
         transition: all 0.18s ease;
     }
 
-    [data-testid="stSidebar"] .stTextInput > div > div > input {
+    .stTextInput > div > div > input {
         color: var(--text-main) !important;
         padding-left: 0.95rem;
     }
 
-    [data-testid="stSidebar"] .stTextInput > div > div > input::placeholder {
+    .stTextInput > div > div > input::placeholder {
         color: #d991af !important;
     }
 
-    [data-testid="stSidebar"] [data-baseweb="select"] > div:hover,
-    [data-testid="stSidebar"] .stTextInput > div > div > input:hover,
-    [data-testid="stSidebar"] [data-baseweb="select"] > div:focus-within,
-    [data-testid="stSidebar"] .stTextInput > div > div > input:focus {
+    .stSelectbox [data-baseweb="select"] > div:hover,
+    .stMultiSelect [data-baseweb="select"] > div:hover,
+    .stTextInput > div > div > input:hover,
+    .stSelectbox [data-baseweb="select"] > div:focus-within,
+    .stMultiSelect [data-baseweb="select"] > div:focus-within,
+    .stTextInput > div > div > input:focus {
         border-color: rgba(255, 79, 216, 0.55) !important;
         box-shadow:
             0 0 0 1px rgba(255, 79, 216, 0.18),
             0 0 24px rgba(255, 79, 216, 0.16);
     }
 
-    [data-testid="stSidebar"] [data-baseweb="tag"] {
+    [data-baseweb="tag"] {
         border-radius: 999px !important;
         border: 1px solid rgba(255, 119, 165, 0.26) !important;
         background: linear-gradient(90deg, rgba(255,49,92,0.18), rgba(255,79,216,0.18)) !important;
@@ -370,33 +395,33 @@ APP_CSS = """
         font-weight: 700;
     }
 
-    [data-testid="stSidebar"] [data-baseweb="select"] input {
+    [data-baseweb="select"] input {
         color: var(--text-main) !important;
     }
 
-    [data-testid="stSidebar"] [data-baseweb="slider"] [role="slider"] {
+    .stSlider [data-baseweb="slider"] [role="slider"] {
         background: linear-gradient(180deg, #ffd8e7, #ff78ad) !important;
         border: 2px solid rgba(255,255,255,0.75) !important;
         box-shadow: 0 0 0 6px rgba(255, 79, 216, 0.14);
     }
 
-    [data-testid="stSidebar"] [data-baseweb="slider"] > div > div {
+    .stSlider [data-baseweb="slider"] > div > div {
         background: linear-gradient(90deg, rgba(255, 49, 92, 0.2), rgba(255, 79, 216, 0.16)) !important;
         border-radius: 999px;
         height: 0.4rem !important;
     }
 
-    [data-testid="stSidebar"] [data-baseweb="slider"] > div > div > div {
+    .stSlider [data-baseweb="slider"] > div > div > div {
         background: linear-gradient(90deg, #ff315c, #ff4fd8) !important;
         border-radius: 999px;
         height: 0.4rem !important;
     }
 
-    [data-testid="stSidebar"] [data-testid="stTickBar"] {
+    .stSlider [data-testid="stTickBar"] {
         color: #e6a1bc !important;
     }
 
-    [data-testid="stSidebar"] .stCaption {
+    .stCaption {
         color: #efb4c8 !important;
     }
 
